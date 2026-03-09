@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
-import { Check, X, Search, Filter, ArrowUp, ArrowDown, ArrowUpDown, Download, ChevronDown, ChevronRight, BookOpen, Briefcase, Globe, Layout, ListChecks, Star, MapPin, Trophy, ExternalLink, RefreshCw } from 'lucide-react';
+import { Check, X, Search, Filter, ArrowUp, ArrowDown, ArrowUpDown, Download, ChevronDown, ChevronRight, BookOpen, Briefcase, Globe, Layout, ListChecks, Star, MapPin, Trophy, ExternalLink, RefreshCw, Calendar } from 'lucide-react';
 import { useConcursoStore, Concurso } from '../store';
 import { CSVUpload } from '../components/CSVUpload';
 import { StatusBadge } from '../components/StatusBadge';
@@ -567,28 +567,25 @@ export default function Opportunities() {
               <tr>
                 <th className="px-6 py-4 w-10"></th>
                 <th className="px-6 py-4 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleSort('institution')}>
-                  <div className="flex items-center">Órgão / Banca <SortIcon column="institution" /></div>
+                  <div className="flex items-center uppercase text-[11px] tracking-wider">Órgão / Instituição <SortIcon column="institution" /></div>
                 </th>
                 <th className="px-6 py-4 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleSort('score')}>
-                  <div className="flex items-center">Pontuação <SortIcon column="score" /></div>
+                  <div className="flex items-center uppercase text-[11px] tracking-wider">Pontuação <SortIcon column="score" /></div>
                 </th>
                 <th className="px-6 py-4 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleSort('status')}>
-                  <div className="flex items-center">Status <SortIcon column="status" /></div>
-                </th>
-                <th className="px-6 py-4 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleSort('salary')}>
-                  <div className="flex items-center">Salário <SortIcon column="salary" /></div>
+                  <div className="flex items-center uppercase text-[11px] tracking-wider">Status <SortIcon column="status" /></div>
                 </th>
                 <th className="px-6 py-4 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleSort('exam_date')}>
-                  <div className="flex items-center">Data Prova <SortIcon column="exam_date" /></div>
+                  <div className="flex items-center uppercase text-[11px] tracking-wider">Data Prova <SortIcon column="exam_date" /></div>
                 </th>
-                <th className="px-6 py-4 text-right">Ações</th>
+                <th className="px-6 py-4 text-right uppercase text-[11px] tracking-wider">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {concursos.length === 0 ? (
-                <tr><td colSpan={9} className="px-6 py-8 text-center text-slate-500">Nenhum concurso encontrado.</td></tr>
+                <tr><td colSpan={6} className="px-6 py-8 text-center text-slate-500">Nenhum concurso encontrado.</td></tr>
               ) : processedConcursos.length === 0 ? (
-                <tr><td colSpan={9} className="px-6 py-8 text-center text-slate-500">Nenhum resultado para a busca.</td></tr>
+                <tr><td colSpan={6} className="px-6 py-8 text-center text-slate-500">Nenhum resultado para a busca.</td></tr>
               ) : (
                 <>
                   {visibleConcursos.map((c, index) => {
@@ -607,93 +604,79 @@ export default function Opportunities() {
                           onClick={() => setExpandedRow(isExpanded ? null : c.id)}
                         >
                           <td className="px-6 py-4">
-                            {isExpanded ? <ChevronDown size={18} className="text-indigo-600" /> : <ChevronRight size={18} className="text-slate-400" />}
+                            <div className={clsx(
+                              "w-8 h-8 rounded-lg flex items-center justify-center transition-colors",
+                              isExpanded ? "bg-indigo-50 text-indigo-600" : "bg-slate-50 text-slate-400"
+                            )}>
+                              {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                            </div>
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex items-center space-x-3">
-                              <button 
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  toggleFavorite(c.id);
-                                }}
-                                className={clsx(
-                                  "transition-colors flex-shrink-0",
-                                  c.is_favorite ? "text-amber-400" : "text-slate-300 hover:text-amber-400"
-                                )}
-                              >
-                                <Star size={18} fill={c.is_favorite ? "currentColor" : "none"} />
-                              </button>
                               <div className="min-w-0">
                                 <div className="flex items-center gap-2 mb-0.5">
-                                  <span className="font-mono text-[10px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-600 font-bold flex-shrink-0">{c.location}</span>
-                                  <div className="font-medium text-slate-900 truncate">{c.institution}</div>
-                                  {c.board && c.board !== 'N/A' && (
-                                    <span className="text-indigo-600 font-bold text-[9px] bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100 flex-shrink-0 uppercase tracking-tight">
-                                      {c.board}
+                                  <div className="font-bold text-slate-900 truncate text-sm">{c.institution}</div>
+                                  <div className="flex items-center gap-1">
+                                    <span className="font-mono text-[10px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-500 font-bold flex-shrink-0 uppercase">{c.location}</span>
+                                    <span className="text-[10px] text-slate-400 font-medium truncate max-w-[100px]">
+                                      {c.board && c.board !== 'N/A' ? c.board : 'Banca a definir'}
                                     </span>
-                                  )}
+                                  </div>
                                 </div>
-                                <div className="text-slate-500 text-xs truncate">
-                                  {c.source}
+                                <div className="text-emerald-600 font-semibold text-xs">
+                                  {c.salary && c.salary !== 'N/A' ? c.salary : 'Consulte o edital'}
                                 </div>
                               </div>
                             </div>
                           </td>
                           <td className="px-6 py-4">
-                            <div className="flex items-center space-x-1">
-                              <Trophy size={14} className={clsx(c.calculatedScore > 70 ? "text-emerald-500" : "text-amber-500")} />
-                              <span className="font-semibold">{c.calculatedScore}</span>
+                            <div className="flex items-center space-x-2 text-emerald-600">
+                              <Trophy size={16} />
+                              <span className="font-bold text-base">{c.calculatedScore}</span>
                             </div>
                           </td>
                           <td className="px-6 py-4">
                             <StatusBadge status={status as any} />
                           </td>
-                          <td className="px-6 py-4 text-slate-700 font-medium">
-                            {c.salary && c.salary !== 'N/A' ? c.salary : '---'}
+                          <td className="px-6 py-4 text-slate-500">
+                            <div className="flex items-center gap-2">
+                              <Calendar size={14} className="text-slate-400" />
+                              <span className="font-medium">{c.exam_date && c.exam_date !== 'N/A' ? c.exam_date : 'Consultar Edital'}</span>
+                            </div>
                           </td>
-                          <td className="px-6 py-4 text-slate-600">{c.exam_date}</td>
                           <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
-                            <div className="flex items-center justify-end space-x-1.5">
+                            <div className="flex items-center justify-end space-x-2">
                               {c.link && c.link !== 'N/A' && (
-                                <a href={c.link} target="_blank" rel="noopener noreferrer" className="p-1 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Acessar Edital">
-                                  <ExternalLink size={16} />
+                                <a href={c.link} target="_blank" rel="noopener noreferrer" className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all" title="Acessar Edital">
+                                  <ExternalLink size={18} />
                                 </a>
                               )}
                               
-                              {c.interest_status === 'interested' ? (
-                                <button 
-                                  onClick={() => handleMarkInterest(c.id, 'none')}
-                                  className="flex items-center gap-1 bg-indigo-600 text-white px-2 py-1 rounded-md text-[10px] font-bold shadow-sm hover:bg-indigo-700 transition-colors"
-                                >
-                                  <Check size={12} />
-                                  <span>Interessado</span>
-                                </button>
-                              ) : c.interest_status === 'ignored' ? (
-                                <button 
-                                  onClick={() => handleMarkInterest(c.id, 'none')}
-                                  className="flex items-center gap-1 bg-slate-200 text-slate-600 px-2 py-1 rounded-md text-[10px] font-bold hover:bg-slate-300 transition-colors"
-                                >
-                                  <RefreshCw size={12} />
-                                  <span>Restaurar</span>
-                                </button>
-                              ) : (
-                                <>
-                                  <button 
-                                    onClick={() => handleMarkInterest(c.id, 'interested')}
-                                    className="flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-100 px-2 py-1 rounded-md text-[10px] font-bold hover:bg-emerald-100 transition-colors"
-                                  >
-                                    <Check size={12} />
-                                    <span>Interesse</span>
-                                  </button>
-                                  <button 
-                                    onClick={() => handleMarkInterest(c.id, 'ignored')}
-                                    className="flex items-center gap-1 bg-rose-50 text-rose-700 border border-rose-100 px-2 py-1 rounded-md text-[10px] font-bold hover:bg-rose-100 transition-colors"
-                                  >
-                                    <X size={12} />
-                                    <span>Ignorar</span>
-                                  </button>
-                                </>
-                              )}
+                              <button 
+                                onClick={() => handleMarkInterest(c.id, c.interest_status === 'interested' ? 'none' : 'interested')}
+                                className={clsx(
+                                  "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all shadow-sm",
+                                  c.interest_status === 'interested' 
+                                    ? "bg-emerald-600 text-white hover:bg-emerald-700" 
+                                    : "bg-emerald-50 text-emerald-700 border border-emerald-100 hover:bg-emerald-100"
+                                )}
+                              >
+                                <Check size={14} />
+                                <span>{c.interest_status === 'interested' ? 'Interessado' : 'Interesse'}</span>
+                              </button>
+                              
+                              <button 
+                                onClick={() => handleMarkInterest(c.id, c.interest_status === 'ignored' ? 'none' : 'ignored')}
+                                className={clsx(
+                                  "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all shadow-sm",
+                                  c.interest_status === 'ignored'
+                                    ? "bg-rose-600 text-white hover:bg-rose-700"
+                                    : "bg-rose-50 text-rose-700 border border-rose-100 hover:bg-rose-100"
+                                )}
+                              >
+                                <X size={14} />
+                                <span>{c.interest_status === 'ignored' ? 'Ignorado' : 'Ignorar'}</span>
+                              </button>
                             </div>
                           </td>
                         </tr>
