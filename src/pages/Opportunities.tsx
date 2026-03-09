@@ -407,9 +407,16 @@ export default function Opportunities() {
                           <span className="font-mono text-[10px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-600 uppercase font-bold">{c.location}</span>
                           <span className="text-[10px] text-slate-400 font-medium truncate">{c.source}</span>
                         </div>
-                        <h3 className="text-base font-bold text-slate-900 leading-tight line-clamp-2" title={c.institution}>
-                          {c.institution}
-                        </h3>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 className="text-base font-bold text-slate-900 leading-tight line-clamp-2" title={c.institution}>
+                            {c.institution}
+                          </h3>
+                          {c.board && c.board !== 'N/A' && (
+                            <span className="text-indigo-600 font-bold text-[9px] bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100 flex-shrink-0 uppercase tracking-tight">
+                              {c.board}
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <button 
                         onClick={(e) => {
@@ -514,8 +521,18 @@ export default function Opportunities() {
                           </div>
                         )}
                         <div className="col-span-2">
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Cargos</p>
-                          <p className="text-xs text-slate-700 font-medium line-clamp-3">{c.positions}</p>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Cargos</p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {c.positions?.split(/[,;]/).map((pos, i) => {
+                              const trimmed = pos.trim();
+                              if (!trimmed) return null;
+                              return (
+                                <span key={i} className="px-2 py-0.5 bg-white text-slate-600 rounded-md text-[9px] font-bold border border-slate-200 shadow-sm">
+                                  {trimmed}
+                                </span>
+                              );
+                            })}
+                          </div>
                         </div>
                         <div className="col-span-2">
                           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Disciplinas</p>
@@ -550,7 +567,7 @@ export default function Opportunities() {
               <tr>
                 <th className="px-6 py-4 w-10"></th>
                 <th className="px-6 py-4 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleSort('institution')}>
-                  <div className="flex items-center">Órgão / Instituição <SortIcon column="institution" /></div>
+                  <div className="flex items-center">Órgão / Banca <SortIcon column="institution" /></div>
                 </th>
                 <th className="px-6 py-4 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleSort('score')}>
                   <div className="flex items-center">Pontuação <SortIcon column="score" /></div>
@@ -558,8 +575,8 @@ export default function Opportunities() {
                 <th className="px-6 py-4 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleSort('status')}>
                   <div className="flex items-center">Status <SortIcon column="status" /></div>
                 </th>
-                <th className="px-6 py-4 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleSort('board')}>
-                  <div className="flex items-center">Banca <SortIcon column="board" /></div>
+                <th className="px-6 py-4 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleSort('salary')}>
+                  <div className="flex items-center">Salário <SortIcon column="salary" /></div>
                 </th>
                 <th className="px-6 py-4 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleSort('exam_date')}>
                   <div className="flex items-center">Data Prova <SortIcon column="exam_date" /></div>
@@ -569,9 +586,9 @@ export default function Opportunities() {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {concursos.length === 0 ? (
-                <tr><td colSpan={8} className="px-6 py-8 text-center text-slate-500">Nenhum concurso encontrado.</td></tr>
+                <tr><td colSpan={9} className="px-6 py-8 text-center text-slate-500">Nenhum concurso encontrado.</td></tr>
               ) : processedConcursos.length === 0 ? (
-                <tr><td colSpan={8} className="px-6 py-8 text-center text-slate-500">Nenhum resultado para a busca.</td></tr>
+                <tr><td colSpan={9} className="px-6 py-8 text-center text-slate-500">Nenhum resultado para a busca.</td></tr>
               ) : (
                 <>
                   {visibleConcursos.map((c, index) => {
@@ -610,6 +627,11 @@ export default function Opportunities() {
                                 <div className="flex items-center gap-2 mb-0.5">
                                   <span className="font-mono text-[10px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-600 font-bold flex-shrink-0">{c.location}</span>
                                   <div className="font-medium text-slate-900 truncate">{c.institution}</div>
+                                  {c.board && c.board !== 'N/A' && (
+                                    <span className="text-indigo-600 font-bold text-[9px] bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100 flex-shrink-0 uppercase tracking-tight">
+                                      {c.board}
+                                    </span>
+                                  )}
                                 </div>
                                 <div className="text-slate-500 text-xs truncate">
                                   {c.source}
@@ -626,7 +648,9 @@ export default function Opportunities() {
                           <td className="px-6 py-4">
                             <StatusBadge status={status as any} />
                           </td>
-                          <td className="px-6 py-4 text-slate-600 font-medium">{c.board}</td>
+                          <td className="px-6 py-4 text-slate-700 font-medium">
+                            {c.salary && c.salary !== 'N/A' ? c.salary : '---'}
+                          </td>
                           <td className="px-6 py-4 text-slate-600">{c.exam_date}</td>
                           <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
                             <div className="flex items-center justify-end space-x-1.5">
@@ -724,8 +748,16 @@ export default function Opportunities() {
                                       <Briefcase size={16} className="text-indigo-600" />
                                       Cargos e Oportunidades
                                     </h4>
-                                    <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-                                      <p className="text-slate-700 text-sm leading-relaxed">{c.positions}</p>
+                                    <div className="flex flex-wrap gap-2">
+                                      {c.positions?.split(/[,;]/).map((pos, i) => {
+                                        const trimmed = pos.trim();
+                                        if (!trimmed) return null;
+                                        return (
+                                          <span key={i} className="px-2.5 py-1 bg-white text-slate-700 rounded-lg text-[10px] font-bold border border-slate-200 shadow-sm hover:border-indigo-300 transition-colors">
+                                            {trimmed}
+                                          </span>
+                                        );
+                                      })}
                                     </div>
                                   </div>
 
