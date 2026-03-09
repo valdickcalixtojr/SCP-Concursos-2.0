@@ -1,12 +1,13 @@
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, setDoc, onSnapshot, collection, getDocs } from 'firebase/firestore';
-import { auth, db } from '../lib/firebase';
+import { auth, db, isFirebaseConfigured } from '../lib/firebase';
 import { useConcursoStore, User, ScoringRule, UserProfileScoring, Concurso } from '../store';
 
 let isSyncingFromFirebase = false;
 let unsubscribeFromFirestore: (() => void) | null = null;
 
 export const fetchGlobalConcursos = async () => {
+  if (!isFirebaseConfigured) return false;
   try {
     const concursosRef = collection(db, 'concursos');
     const snapshot = await getDocs(concursosRef);
@@ -53,6 +54,7 @@ export const fetchGlobalConcursos = async () => {
 };
 
 export const forceSyncToFirebase = async () => {
+  if (!isFirebaseConfigured) return false;
   const state = useConcursoStore.getState();
   if (!state.user) return false;
 
@@ -72,6 +74,7 @@ export const forceSyncToFirebase = async () => {
 };
 
 export const forceSyncFromFirebase = async () => {
+  if (!isFirebaseConfigured) return false;
   const store = useConcursoStore.getState();
   if (!store.user) return;
 
@@ -96,6 +99,10 @@ export const forceSyncFromFirebase = async () => {
 };
 
 export const initFirebaseSync = () => {
+  if (!isFirebaseConfigured) {
+    console.warn("Firebase is not configured. Sync disabled.");
+    return;
+  }
   onAuthStateChanged(auth, async (firebaseUser) => {
     const store = useConcursoStore.getState();
     

@@ -19,6 +19,7 @@ export default function Opportunities() {
   const [esferaFilter, setEsferaFilter] = useState('');
   const [modalidadeFilter, setModalidadeFilter] = useState('');
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState({
     uf: '',
     status: '',
@@ -124,6 +125,16 @@ export default function Opportunities() {
       modalidade: modalidadeFilter
     });
     setVisibleCount(50);
+    setIsFilterDrawerOpen(false);
+  };
+
+  const clearFilters = () => {
+    setUfFilter('');
+    setStatusFilter('');
+    setEsferaFilter('');
+    setModalidadeFilter('');
+    setAppliedFilters({ uf: '', status: '', esfera: '', modalidade: '' });
+    setVisibleCount(50);
   };
 
   const processedConcursos = useMemo(() => {
@@ -211,42 +222,91 @@ export default function Opportunities() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-20 md:pb-0">
       <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
         <div>
           <h2 className="text-2xl font-bold text-slate-900">Oportunidades</h2>
-          <p className="text-slate-500">Encontre e gerencie concursos públicos via CSV.</p>
+          <p className="text-slate-500">Encontre e gerencie concursos públicos.</p>
         </div>
-        <div className="flex flex-wrap items-center gap-2 md:gap-3">
+        <div className="flex items-center gap-2">
           <button
             onClick={handleSync}
             disabled={isSyncing}
-            className="flex-1 md:flex-none flex items-center justify-center space-x-2 bg-indigo-50 text-indigo-700 border border-indigo-200 px-4 py-2 rounded-lg hover:bg-indigo-100 transition-colors disabled:opacity-50 font-medium text-sm md:text-base"
+            className="flex-1 md:flex-none flex items-center justify-center space-x-2 bg-indigo-50 text-indigo-700 border border-indigo-200 px-4 py-2 rounded-lg hover:bg-indigo-100 transition-colors disabled:opacity-50 font-medium text-sm"
           >
             <RefreshCw size={18} className={isSyncing ? "animate-spin" : ""} />
-            <span>{isSyncing ? 'Sincronizando...' : 'Sincronizar'}</span>
+            <span className="hidden sm:inline">{isSyncing ? 'Sincronizando...' : 'Sincronizar'}</span>
+            <span className="sm:hidden">{isSyncing ? '...' : 'Sinc.'}</span>
           </button>
           <button
-            onClick={handleDownload}
-            disabled={processedConcursos.length === 0}
-            className="flex-1 md:flex-none flex items-center justify-center space-x-2 bg-slate-100 text-slate-700 border border-slate-200 px-4 py-2 rounded-lg hover:bg-slate-200 transition-colors disabled:opacity-50 text-sm md:text-base"
+            onClick={() => setIsFilterDrawerOpen(true)}
+            className="md:hidden flex items-center justify-center space-x-2 bg-slate-100 text-slate-700 border border-slate-200 px-4 py-2 rounded-lg hover:bg-slate-200 transition-colors text-sm font-medium"
           >
-            <Download size={18} />
-            <span>Download</span>
+            <Filter size={18} />
+            <span>Filtros</span>
           </button>
-          <div className="w-full md:w-auto">
+          <div className="hidden md:block">
             <CSVUpload />
           </div>
         </div>
       </div>
 
-      <div className="bg-white p-4 md:p-5 rounded-xl shadow-sm border border-slate-100 space-y-4 md:space-y-5">
-        <div className="flex items-center space-x-3 bg-slate-50 p-3 rounded-lg border border-slate-200 focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 transition-all">
-          <Search size={20} className="text-slate-400" />
+      {/* Quick Filter Chips */}
+      <div className="flex overflow-x-auto pb-2 gap-2 no-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
+        <button
+          onClick={() => { setStatusFilter('Aberto'); handleApplyFilters(); }}
+          className={clsx(
+            "flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold transition-all border",
+            appliedFilters.status === 'Aberto' ? "bg-indigo-600 text-white border-indigo-600" : "bg-white text-slate-600 border-slate-200 hover:border-indigo-300"
+          )}
+        >
+          Inscrições Abertas
+        </button>
+        <button
+          onClick={() => { setEsferaFilter('Federal'); handleApplyFilters(); }}
+          className={clsx(
+            "flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold transition-all border",
+            appliedFilters.esfera === 'Federal' ? "bg-indigo-600 text-white border-indigo-600" : "bg-white text-slate-600 border-slate-200 hover:border-indigo-300"
+          )}
+        >
+          Federal
+        </button>
+        <button
+          onClick={() => { setUfFilter('SP'); handleApplyFilters(); }}
+          className={clsx(
+            "flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold transition-all border",
+            appliedFilters.uf === 'SP' ? "bg-indigo-600 text-white border-indigo-600" : "bg-white text-slate-600 border-slate-200 hover:border-indigo-300"
+          )}
+        >
+          São Paulo
+        </button>
+        <button
+          onClick={() => { setUfFilter('RJ'); handleApplyFilters(); }}
+          className={clsx(
+            "flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold transition-all border",
+            appliedFilters.uf === 'RJ' ? "bg-indigo-600 text-white border-indigo-600" : "bg-white text-slate-600 border-slate-200 hover:border-indigo-300"
+          )}
+        >
+          Rio de Janeiro
+        </button>
+        {isFilterActive && (
+          <button
+            onClick={clearFilters}
+            className="flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-600 border border-rose-100 hover:bg-rose-100 transition-all"
+          >
+            Limpar Filtros
+          </button>
+        )}
+      </div>
+
+      {/* BARRA DE AÇÕES (Busca sempre visível, Botão de Filtro apenas no Mobile) */}
+      <div className="flex gap-2 mb-6">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
           <input 
             type="text" 
-            placeholder="Buscar por órgão, banca ou fonte..." 
-            className="flex-1 outline-none text-slate-700 bg-transparent text-sm md:text-base"
+            placeholder="Buscar concurso..." 
+            className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none bg-white text-sm"
             value={filter}
             onChange={e => {
               setFilter(e.target.value);
@@ -255,154 +315,271 @@ export default function Opportunities() {
           />
         </div>
         
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-          <div className="flex flex-col space-y-1.5">
-            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Estado (UF)</label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <MapPin size={16} className="text-slate-400" />
-              </div>
-              <select 
-                className="w-full pl-9 pr-8 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 appearance-none transition-all cursor-pointer"
-                value={ufFilter}
-                onChange={e => setUfFilter(e.target.value)}
-              >
-                <option value="">Todas as UFs</option>
-                {ufs.map(uf => (
-                  <option key={uf} value={uf}>{uf}</option>
-                ))}
-              </select>
-              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <ChevronDown size={14} className="text-slate-400" />
-              </div>
-            </div>
-          </div>
+        {/* Botão que só aparece no Mobile */}
+        <button 
+          onClick={() => setIsFilterDrawerOpen(true)}
+          className="md:hidden flex items-center justify-center p-2 bg-indigo-600 text-white rounded-lg shadow-md active:scale-95 transition-transform"
+        >
+          <Filter size={24} />
+        </button>
+      </div>
 
-          <div className="flex flex-col space-y-1.5">
-            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Esfera</label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Globe size={16} className="text-slate-400" />
-              </div>
-              <select 
-                className="w-full pl-9 pr-8 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 appearance-none transition-all cursor-pointer"
-                value={esferaFilter}
-                onChange={e => setEsferaFilter(e.target.value)}
-              >
-                <option value="">Todas as Esferas</option>
-                {esferas.map(esfera => (
-                  <option key={esfera} value={esfera}>{esfera}</option>
-                ))}
-              </select>
-              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <ChevronDown size={14} className="text-slate-400" />
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-col space-y-1.5">
-            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Modalidade</label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Layout size={16} className="text-slate-400" />
-              </div>
-              <select 
-                className="w-full pl-9 pr-8 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 appearance-none transition-all cursor-pointer"
-                value={modalidadeFilter}
-                onChange={e => setModalidadeFilter(e.target.value)}
-              >
-                <option value="">Todas as Modalidades</option>
-                {modalidades.map(modalidade => (
-                  <option key={modalidade} value={modalidade}>{modalidade}</option>
-                ))}
-              </select>
-              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <ChevronDown size={14} className="text-slate-400" />
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-col space-y-1.5">
-            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <ListChecks size={16} className="text-slate-400" />
-              </div>
-              <select 
-                className="w-full pl-9 pr-8 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 appearance-none transition-all cursor-pointer"
-                value={statusFilter}
-                onChange={e => setStatusFilter(e.target.value)}
-              >
-                <option value="">Todos os Status</option>
-                <option value="Aberto">Aberto</option>
-                <option value="Autorizado">Autorizado</option>
-                <option value="Comissão Formada">Comissão Formada</option>
-                <option value="Previsto">Previsto</option>
-                <option value="Solicitado">Solicitado</option>
-                <option value="Encerrado">Encerrado</option>
-              </select>
-              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <ChevronDown size={14} className="text-slate-400" />
-              </div>
-            </div>
-          </div>
+      {/* --- FILTROS DESKTOP (Visível apenas em md:) --- */}
+      <div className="hidden md:flex flex-wrap gap-4 mb-8 bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+        <div className="flex-1 min-w-[150px]">
+          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Estado (UF)</label>
+          <select 
+            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 outline-none focus:border-indigo-500"
+            value={ufFilter}
+            onChange={e => setUfFilter(e.target.value)}
+          >
+            <option value="">Todas as UFs</option>
+            {ufs.map(uf => (
+              <option key={uf} value={uf}>{uf}</option>
+            ))}
+          </select>
         </div>
-
+        <div className="flex-1 min-w-[150px]">
+          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Esfera</label>
+          <select 
+            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 outline-none focus:border-indigo-500"
+            value={esferaFilter}
+            onChange={e => setEsferaFilter(e.target.value)}
+          >
+            <option value="">Todas as Esferas</option>
+            {esferas.map(esfera => (
+              <option key={esfera} value={esfera}>{esfera}</option>
+            ))}
+          </select>
+        </div>
+        <div className="flex-1 min-w-[150px]">
+          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Modalidade</label>
+          <select 
+            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 outline-none focus:border-indigo-500"
+            value={modalidadeFilter}
+            onChange={e => setModalidadeFilter(e.target.value)}
+          >
+            <option value="">Todas as Modalidades</option>
+            {modalidades.map(modalidade => (
+              <option key={modalidade} value={modalidade}>{modalidade}</option>
+            ))}
+          </select>
+        </div>
+        <div className="flex-1 min-w-[150px]">
+          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Status</label>
+          <select 
+            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 outline-none focus:border-indigo-500"
+            value={statusFilter}
+            onChange={e => setStatusFilter(e.target.value)}
+          >
+            <option value="">Todos os Status</option>
+            <option value="Aberto">Aberto</option>
+            <option value="Autorizado">Autorizado</option>
+            <option value="Comissão Formada">Comissão Formada</option>
+            <option value="Previsto">Previsto</option>
+            <option value="Solicitado">Solicitado</option>
+            <option value="Encerrado">Encerrado</option>
+          </select>
+        </div>
         {isFilterActive && (
-          <div className="flex justify-end pt-2">
+          <div className="w-full flex justify-end pt-2">
             <button
               onClick={handleApplyFilters}
-              className="flex items-center space-x-2 bg-indigo-600 text-white px-5 py-2.5 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm text-sm font-medium"
+              className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors text-sm font-bold shadow-md"
             >
-              <Filter size={16} />
-              <span>Aplicar Filtros</span>
+              Aplicar Filtros
             </button>
           </div>
         )}
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+      {/* MOBILE: Cards (hidden em md:) */}
+      <div className="md:hidden grid grid-cols-1 gap-4">
+        {concursos.length === 0 ? (
+          <div className="col-span-full bg-white p-12 text-center rounded-2xl border border-dashed border-slate-300 text-slate-500">
+            Nenhum concurso encontrado. Faça o upload do arquivo CSV.
+          </div>
+        ) : processedConcursos.length === 0 ? (
+          <div className="col-span-full bg-white p-12 text-center rounded-2xl border border-slate-200 text-slate-500">
+            Nenhum resultado para a busca.
+          </div>
+        ) : (
+          <>
+            {visibleConcursos.map((c, index) => {
+              const status = c.status && c.status !== 'N/A' ? c.status : getEditalStatus(c.registration_end, c.exam_date);
+              const isExpanded = expandedRow === c.id;
+              
+              return (
+                <div 
+                  key={`${c.id}-${index}`}
+                  className={clsx(
+                    "bg-white rounded-2xl border transition-all duration-300 overflow-hidden flex flex-col",
+                    c.interest_status === 'interested' ? "border-indigo-200 shadow-indigo-100/50 shadow-lg" : "border-slate-100 shadow-sm",
+                    c.interest_status === 'ignored' && "opacity-60 grayscale",
+                    isExpanded && "ring-2 ring-indigo-500/20"
+                  )}
+                >
+                  <div className="p-4 flex flex-col flex-1">
+                    <div className="flex justify-between items-start gap-2 mb-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-mono text-[10px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-600 uppercase font-bold">{c.location}</span>
+                          <span className="text-[10px] text-slate-400 font-medium truncate">{c.source}</span>
+                        </div>
+                        <h3 className="text-base font-bold text-slate-900 leading-tight line-clamp-2" title={c.institution}>
+                          {c.institution}
+                        </h3>
+                      </div>
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleFavorite(c.id);
+                        }}
+                        className={clsx(
+                          "flex-shrink-0 p-1 transition-colors",
+                          c.is_favorite ? "text-amber-400" : "text-slate-300 hover:text-amber-400"
+                        )}
+                      >
+                        <Star size={20} fill={c.is_favorite ? "currentColor" : "none"} />
+                      </button>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2 mb-4">
+                      <StatusBadge status={status as any} />
+                      <div className="flex items-center space-x-1 bg-amber-50 text-amber-700 px-2 py-0.5 rounded text-[10px] font-bold border border-amber-100">
+                        <Trophy size={10} />
+                        <span>Score: {c.calculatedScore}</span>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3 py-3 border-y border-slate-50 mb-4">
+                      <div>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Salário</p>
+                        <p className="text-sm font-bold text-indigo-600 truncate">{c.salary}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Vagas</p>
+                        <p className="text-sm font-bold text-slate-700 truncate">{c.vacancies}</p>
+                      </div>
+                    </div>
+
+                    <div className="mt-auto flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-1">
+                        {c.interest_status === 'interested' ? (
+                          <button 
+                            onClick={() => handleMarkInterest(c.id, 'none')}
+                            className="flex items-center gap-1 bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm"
+                          >
+                            <Check size={14} />
+                            <span>Interessado</span>
+                          </button>
+                        ) : c.interest_status === 'ignored' ? (
+                          <button 
+                            onClick={() => handleMarkInterest(c.id, 'none')}
+                            className="flex items-center gap-1 bg-slate-200 text-slate-600 px-3 py-1.5 rounded-lg text-xs font-bold"
+                          >
+                            <RefreshCw size={14} />
+                            <span>Restaurar</span>
+                          </button>
+                        ) : (
+                          <div className="flex items-center gap-1">
+                            <button 
+                              onClick={() => handleMarkInterest(c.id, 'interested')}
+                              className="bg-emerald-50 text-emerald-700 border border-emerald-100 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-emerald-100 transition-colors"
+                            >
+                              Interesse
+                            </button>
+                            <button 
+                              onClick={() => handleMarkInterest(c.id, 'ignored')}
+                              className="bg-rose-50 text-rose-700 border border-rose-100 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-rose-100 transition-colors"
+                            >
+                              Ignorar
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                      <button 
+                        onClick={() => setExpandedRow(isExpanded ? null : c.id)}
+                        className="p-2 text-slate-400 hover:text-indigo-600 transition-colors"
+                      >
+                        {isExpanded ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {isExpanded && (
+                    <div className="p-4 bg-slate-50 border-t border-slate-100 space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Banca</p>
+                          <p className="text-xs text-slate-700 font-medium">{c.board}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Prova</p>
+                          <p className="text-xs text-slate-700 font-medium">{c.exam_date}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Inscrições até</p>
+                          <p className="text-xs text-slate-700 font-medium">{c.registration_end}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Esfera</p>
+                          <p className="text-xs text-slate-700 font-medium">{c.esfera}</p>
+                        </div>
+                      </div>
+                      {c.link && c.link !== 'N/A' && (
+                        <a 
+                          href={c.link} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="flex items-center justify-center gap-2 w-full bg-white border border-slate-200 py-2 rounded-lg text-xs font-bold text-indigo-600 hover:bg-indigo-50 transition-colors"
+                        >
+                          <ExternalLink size={14} />
+                          Acessar Edital
+                        </a>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </>
+        )}
+      </div>
+
+      {/* DESKTOP/TABLET: Tabela (block apenas em md:) */}
+      <div className="hidden md:block bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm border-collapse">
             <thead className="bg-slate-50 text-slate-600 font-medium border-b border-slate-100">
               <tr>
-                <th className="px-2 md:px-6 py-3 md:py-4 w-8 md:w-10"></th>
-                <th className="px-2 md:px-6 py-3 md:py-4 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleSort('institution')}>
+                <th className="px-6 py-4 w-10"></th>
+                <th className="px-6 py-4 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleSort('institution')}>
                   <div className="flex items-center">Órgão / Fonte <SortIcon column="institution" /></div>
                 </th>
-                <th className="hidden sm:table-cell px-6 py-4 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleSort('location')}>
+                <th className="px-6 py-4 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleSort('location')}>
                   <div className="flex items-center">UF <SortIcon column="location" /></div>
                 </th>
-                <th className="hidden md:table-cell px-6 py-4 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleSort('board')}>
+                <th className="px-6 py-4 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleSort('board')}>
                   <div className="flex items-center">Banca <SortIcon column="board" /></div>
                 </th>
-                <th className="hidden md:table-cell px-6 py-4 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleSort('score')}>
+                <th className="px-6 py-4 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleSort('score')}>
                   <div className="flex items-center">Pontuação <SortIcon column="score" /></div>
                 </th>
-                <th className="hidden sm:table-cell px-6 py-4 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleSort('status')}>
+                <th className="px-6 py-4 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleSort('status')}>
                   <div className="flex items-center">Status <SortIcon column="status" /></div>
                 </th>
-                <th className="hidden md:table-cell px-6 py-4 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleSort('salary')}>
+                <th className="px-6 py-4 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleSort('salary')}>
                   <div className="flex items-center">Salário <SortIcon column="salary" /></div>
                 </th>
-                <th className="hidden lg:table-cell px-6 py-4 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleSort('exam_date')}>
-                  <div className="flex items-center">Data Prova <SortIcon column="exam_date" /></div>
-                </th>
-                <th className="px-2 md:px-6 py-3 md:py-4 text-right">
-                  <div className="flex flex-col items-end">
-                    <span>Ações</span>
-                    <span className="hidden md:inline text-[10px] font-normal text-slate-400 max-w-[200px] leading-tight">
-                      Link do edital, confirmar ou rejeitar interesse
-                    </span>
-                  </div>
-                </th>
+                <th className="px-6 py-4 text-right">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {concursos.length === 0 ? (
-                <tr><td colSpan={10} className="px-6 py-8 text-center text-slate-500">Nenhum concurso encontrado. Faça o upload do arquivo CSV.</td></tr>
+                <tr><td colSpan={8} className="px-6 py-8 text-center text-slate-500">Nenhum concurso encontrado.</td></tr>
               ) : processedConcursos.length === 0 ? (
-                <tr><td colSpan={10} className="px-6 py-8 text-center text-slate-500">Nenhum resultado para a busca.</td></tr>
+                <tr><td colSpan={8} className="px-6 py-8 text-center text-slate-500">Nenhum resultado para a busca.</td></tr>
               ) : (
                 <>
                   {visibleConcursos.map((c, index) => {
@@ -413,258 +590,113 @@ export default function Opportunities() {
                       <React.Fragment key={`${c.id}-${index}`}>
                         <tr 
                           className={clsx(
-                            "transition-all duration-300 ease-in-out cursor-pointer",
-                            c.interest_status === 'interested' ? "bg-indigo-50/50" : 
-                            c.interest_status === 'ignored' ? "bg-slate-50/50 opacity-50 grayscale" : 
-                            index % 2 === 0 ? "bg-white" : "bg-slate-50/40",
-                            "hover:bg-indigo-50/30",
-                            isExpanded && "bg-slate-100",
-                            animatingRowId === c.id && "scale-[1.01] shadow-md z-10 relative ring-2 ring-indigo-500/20"
+                            "transition-colors cursor-pointer",
+                            c.interest_status === 'interested' ? "bg-indigo-50/30" : 
+                            c.interest_status === 'ignored' ? "opacity-50 grayscale" : "bg-white",
+                            "hover:bg-slate-50"
                           )}
                           onClick={() => setExpandedRow(isExpanded ? null : c.id)}
                         >
-                          <td className="px-2 md:px-6 py-3 md:py-4">
+                          <td className="px-6 py-4">
                             {isExpanded ? <ChevronDown size={18} className="text-indigo-600" /> : <ChevronRight size={18} className="text-slate-400" />}
                           </td>
-                          <td className="px-2 md:px-6 py-3 md:py-4">
-                            <div className="flex items-start space-x-2 md:space-x-3">
+                          <td className="px-6 py-4">
+                            <div className="flex items-center space-x-3">
                               <button 
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   toggleFavorite(c.id);
                                 }}
                                 className={clsx(
-                                  "mt-0.5 transition-colors duration-200",
-                                  c.is_favorite ? "text-amber-400 hover:text-amber-500" : "text-slate-300 hover:text-amber-400"
+                                  "transition-colors",
+                                  c.is_favorite ? "text-amber-400" : "text-slate-300 hover:text-amber-400"
                                 )}
-                                title={c.is_favorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
                               >
                                 <Star size={18} fill={c.is_favorite ? "currentColor" : "none"} />
                               </button>
                               <div>
                                 <div className="font-medium text-slate-900">{c.institution}</div>
-                                <div className="text-slate-500 text-xs mt-1">{c.source}</div>
-                                {/* Mobile only details */}
-                                <div className="md:hidden mt-2 space-y-1">
-                                  <div className="flex items-center space-x-2 text-xs">
-                                    <span className="font-mono bg-slate-100 px-1.5 py-0.5 rounded text-slate-600">{c.location}</span>
-                                    <span className="text-slate-500">{c.board}</span>
-                                  </div>
-                                  <div className="flex items-center space-x-2 text-xs">
-                                    <StatusBadge status={status as any} />
-                                    <span className="font-medium text-indigo-600">{c.salary}</span>
-                                  </div>
-                                  <div className="flex items-center space-x-1 text-xs">
-                                    <Trophy 
-                                      size={12} 
-                                      className={clsx(
-                                        c.calculatedScore > 70 ? "text-emerald-500" : 
-                                        c.calculatedScore > 0 ? "text-amber-500" : "text-slate-300"
-                                      )} 
-                                    />
-                                    <span className={clsx(
-                                      "font-semibold", 
-                                      c.calculatedScore > 70 ? "text-emerald-600" : 
-                                      c.calculatedScore > 0 ? "text-amber-600" : "text-slate-400"
-                                    )}>
-                                      Pontuação: {c.calculatedScore}
-                                    </span>
-                                  </div>
-                                </div>
+                                <div className="text-slate-500 text-xs">{c.source}</div>
                               </div>
                             </div>
                           </td>
-                          <td className="hidden sm:table-cell px-6 py-4">
+                          <td className="px-6 py-4">
                             <span className="font-mono text-xs bg-slate-100 px-1.5 py-0.5 rounded text-slate-600">{c.location}</span>
                           </td>
-                          <td className="hidden md:table-cell px-6 py-4 text-slate-600">{c.board}</td>
-                          <td className="hidden md:table-cell px-6 py-4">
+                          <td className="px-6 py-4 text-slate-600">{c.board}</td>
+                          <td className="px-6 py-4">
                             <div className="flex items-center space-x-1">
-                              <Trophy 
-                                size={c.calculatedScore > 70 ? 16 : 14} 
-                                className={clsx(
-                                  c.calculatedScore > 70 ? "text-emerald-500" : 
-                                  c.calculatedScore > 0 ? "text-amber-500" : "text-slate-300"
-                                )} 
-                              />
-                              <span className={clsx(
-                                "font-semibold", 
-                                c.calculatedScore > 70 ? "text-emerald-600 font-bold text-base" : 
-                                c.calculatedScore > 0 ? "text-amber-600" : "text-slate-400"
-                              )}>
-                                {c.calculatedScore}
-                              </span>
+                              <Trophy size={14} className={clsx(c.calculatedScore > 70 ? "text-emerald-500" : "text-amber-500")} />
+                              <span className="font-semibold">{c.calculatedScore}</span>
                             </div>
                           </td>
-                          <td className="hidden sm:table-cell px-6 py-4">
+                          <td className="px-6 py-4">
                             <StatusBadge status={status as any} />
                           </td>
-                          <td className="hidden md:table-cell px-6 py-4 text-slate-600 font-medium text-indigo-600">{c.salary}</td>
-                          <td className="hidden lg:table-cell px-6 py-4 text-slate-600">{c.exam_date}</td>
-                          <td className="px-2 md:px-6 py-3 md:py-4 text-right" onClick={(e) => e.stopPropagation()}>
-                            <div className="flex items-center justify-end space-x-1 md:space-x-4">
-                              {c.link && c.link !== 'N/A' ? (
-                                <a 
-                                  href={c.link} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer" 
-                                  className="flex items-center space-x-1 text-indigo-600 hover:text-indigo-700 font-medium transition-colors"
-                                >
-                                  <ExternalLink size={14} />
-                                  <span className="hidden md:inline">Edital</span>
+                          <td className="px-6 py-4 text-indigo-600 font-medium">{c.salary}</td>
+                          <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex items-center justify-end space-x-2">
+                              {c.link && c.link !== 'N/A' && (
+                                <a href={c.link} target="_blank" rel="noopener noreferrer" className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
+                                  <ExternalLink size={18} />
                                 </a>
-                              ) : (
-                                <span className="text-slate-300 text-xs italic hidden md:inline">Sem link</span>
                               )}
-
-                              <div className="h-4 w-px bg-slate-200 hidden md:block" />
-
-                              {c.interest_status === 'interested' ? (
-                                <div className="flex items-center space-x-1 md:space-x-2">
-                                  <span className="hidden md:inline text-indigo-600 font-bold text-[10px] uppercase tracking-wider bg-indigo-50 px-2 py-1 rounded border border-indigo-100">Interessado</span>
-                                  <button 
-                                    onClick={() => handleMarkInterest(c.id, 'none')}
-                                    className="p-1 text-slate-400 hover:text-rose-500 active:scale-90 transition-all duration-200"
-                                    title="Remover interesse"
-                                  >
-                                    <X size={14} />
-                                  </button>
-                                </div>
-                              ) : c.interest_status === 'ignored' ? (
-                                <div className="flex items-center space-x-1 md:space-x-2">
-                                  <span className="hidden md:inline text-slate-400 font-bold text-[10px] uppercase tracking-wider bg-slate-100 px-2 py-1 rounded border border-slate-200">Ignorado</span>
-                                  <button 
-                                    onClick={() => handleMarkInterest(c.id, 'none')}
-                                    className="p-1 text-slate-400 hover:text-indigo-500 active:scale-90 transition-all duration-200"
-                                    title="Restaurar"
-                                  >
-                                    <Check size={14} />
-                                  </button>
-                                </div>
-                              ) : (
-                                <div className="flex items-center space-x-1">
-                                  <button 
-                                    onClick={() => handleMarkInterest(c.id, 'interested')}
-                                    className="p-1.5 text-emerald-600 hover:bg-emerald-50 active:scale-90 rounded-md transition-all duration-200 border border-transparent hover:border-emerald-200"
-                                    title="Tenho Interesse"
-                                  >
-                                    <Check size={18} />
-                                  </button>
-                                  <button 
-                                    onClick={() => handleMarkInterest(c.id, 'ignored')}
-                                    className="p-1.5 text-rose-600 hover:bg-rose-50 active:scale-90 rounded-md transition-all duration-200 border border-transparent hover:border-rose-200"
-                                    title="Ignorar"
-                                  >
-                                    <X size={18} />
-                                  </button>
-                                </div>
-                              )}
+                              <button 
+                                onClick={() => handleMarkInterest(c.id, c.interest_status === 'interested' ? 'none' : 'interested')}
+                                className={clsx(
+                                  "p-1.5 rounded-lg transition-colors",
+                                  c.interest_status === 'interested' ? "bg-indigo-600 text-white" : "text-emerald-600 hover:bg-emerald-50"
+                                )}
+                              >
+                                <Check size={18} />
+                              </button>
+                              <button 
+                                onClick={() => handleMarkInterest(c.id, c.interest_status === 'ignored' ? 'none' : 'ignored')}
+                                className={clsx(
+                                  "p-1.5 rounded-lg transition-colors",
+                                  c.interest_status === 'ignored' ? "bg-slate-600 text-white" : "text-rose-600 hover:bg-rose-50"
+                                )}
+                              >
+                                <X size={18} />
+                              </button>
                             </div>
                           </td>
                         </tr>
                         {isExpanded && (
                           <tr className="bg-slate-50/50">
-                            <td colSpan={10} className="p-0">
-                              <div className="p-3 md:p-6 border-t border-slate-100">
-                                <div className="bg-white rounded-xl md:rounded-2xl border border-slate-200 p-4 md:p-6 shadow-sm">
-                                  <div className="mb-4 md:mb-6">
-                                    <h4 className="text-base md:text-lg font-bold text-slate-800">Detalhes do Concurso</h4>
-                                    <p className="text-xs md:text-sm text-slate-500">Informações adicionais sobre o edital e vagas.</p>
-                                  </div>
-                                  
-                                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6">
-                                    {/* Left Column: Basic Info */}
-                                    <div className="lg:col-span-4 space-y-4 md:space-y-6">
-                                      <div className="bg-slate-50 rounded-xl p-4 md:p-5 border border-slate-100 h-full">
-                                        <h5 className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 md:mb-5">Informações Gerais</h5>
-                                        <div className="space-y-4 md:space-y-5">
-                                          <div>
-                                            <div className="flex items-center space-x-2 text-slate-800 font-semibold mb-1.5">
-                                              <Globe size={16} className="text-indigo-500" />
-                                              <span className="text-sm">Esfera</span>
-                                            </div>
-                                            <div className="text-slate-600 text-sm pl-6">
-                                              {c.esfera && c.esfera !== 'N/A' ? c.esfera : 'Não informado'}
-                                            </div>
-                                          </div>
-                                          
-                                          <div>
-                                            <div className="flex items-center space-x-2 text-slate-800 font-semibold mb-1.5">
-                                              <Layout size={16} className="text-indigo-500" />
-                                              <span className="text-sm">Modalidade</span>
-                                            </div>
-                                            <div className="text-slate-600 text-sm pl-6">
-                                              {c.modalidade && c.modalidade !== 'N/A' ? c.modalidade : 'Não informado'}
-                                            </div>
-                                          </div>
-
-                                          <div>
-                                            <div className="flex items-center space-x-2 text-slate-800 font-semibold mb-1.5">
-                                              <ListChecks size={16} className="text-indigo-500" />
-                                              <span className="text-sm">Etapas</span>
-                                            </div>
-                                            <div className="text-slate-600 text-sm pl-6 whitespace-pre-wrap">
-                                              {c.etapas && c.etapas !== 'N/A' ? c.etapas : 'Não informado'}
-                                            </div>
-                                          </div>
-
-                                          <div>
-                                            <div className="flex items-center space-x-2 text-slate-800 font-semibold mb-1.5">
-                                              <BookOpen size={16} className="text-indigo-500" />
-                                              <span className="text-sm">Fim Inscrições</span>
-                                            </div>
-                                            <div className="text-slate-600 text-sm pl-6">
-                                              {c.registration_end && c.registration_end !== 'N/A' ? c.registration_end : 'Não informado'}
-                                            </div>
-                                          </div>
-
-                                          <div>
-                                            <div className="flex items-center space-x-2 text-slate-800 font-semibold mb-1.5">
-                                              <Search size={16} className="text-indigo-500" />
-                                              <span className="text-sm">Período Isenção</span>
-                                            </div>
-                                            <div className="text-slate-600 text-sm pl-6">
-                                              {c.exemption_period && c.exemption_period !== 'N/A' ? c.exemption_period : 'Não informado'}
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
+                            <td colSpan={8} className="p-6">
+                              <div className="grid grid-cols-2 gap-8">
+                                <div className="space-y-4">
+                                  <h4 className="font-bold text-slate-800 border-b pb-2">Informações Gerais</h4>
+                                  <div className="grid grid-cols-2 gap-4 text-sm">
+                                    <div>
+                                      <p className="text-slate-400 font-bold text-[10px] uppercase">Esfera</p>
+                                      <p className="font-medium">{c.esfera}</p>
                                     </div>
-
-                                    {/* Right Column: Positions and Subjects */}
-                                    <div className="lg:col-span-8 space-y-4 md:space-y-6">
-                                      <div className="bg-slate-50 rounded-xl p-4 md:p-5 border border-slate-100 h-full">
-                                        <h5 className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 md:mb-5">Vagas e Conteúdo</h5>
-                                        <div className="space-y-4 md:space-y-6">
-                                          <div>
-                                            <div className="flex items-center space-x-2 text-slate-800 font-semibold mb-2.5">
-                                              <Briefcase size={16} className="text-indigo-500" />
-                                              <span className="text-sm">Cargos</span>
-                                            </div>
-                                            <div className="pl-6 flex flex-wrap gap-2">
-                                              {c.positions && c.positions !== 'N/A' ? (
-                                                c.positions.split(/,|\n|;/).map(p => p.trim()).filter(Boolean).map((pos, idx) => (
-                                                  <span key={idx} className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-white text-indigo-700 border border-indigo-100 shadow-sm">
-                                                    {pos}
-                                                  </span>
-                                                ))
-                                              ) : (
-                                                <span className="text-slate-500 text-sm">Não informado</span>
-                                              )}
-                                            </div>
-                                          </div>
-
-                                          <div>
-                                            <div className="flex items-center space-x-2 text-slate-800 font-semibold mb-2.5">
-                                              <BookOpen size={16} className="text-indigo-500" />
-                                              <span className="text-sm">Disciplinas</span>
-                                            </div>
-                                            <div className="pl-6 text-slate-600 text-sm whitespace-pre-wrap leading-relaxed">
-                                              {c.subjects || 'Não informado'}
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
+                                    <div>
+                                      <p className="text-slate-400 font-bold text-[10px] uppercase">Modalidade</p>
+                                      <p className="font-medium">{c.modalidade}</p>
+                                    </div>
+                                    <div>
+                                      <p className="text-slate-400 font-bold text-[10px] uppercase">Vagas</p>
+                                      <p className="font-medium">{c.vacancies}</p>
+                                    </div>
+                                    <div>
+                                      <p className="text-slate-400 font-bold text-[10px] uppercase">Inscrições até</p>
+                                      <p className="font-medium">{c.registration_end}</p>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="space-y-4">
+                                  <h4 className="font-bold text-slate-800 border-b pb-2">Cargos e Disciplinas</h4>
+                                  <div className="space-y-3 text-sm">
+                                    <div>
+                                      <p className="text-slate-400 font-bold text-[10px] uppercase">Cargos</p>
+                                      <p className="font-medium">{c.positions}</p>
+                                    </div>
+                                    <div>
+                                      <p className="text-slate-400 font-bold text-[10px] uppercase">Disciplinas</p>
+                                      <p className="font-medium whitespace-pre-wrap">{c.subjects}</p>
                                     </div>
                                   </div>
                                 </div>
@@ -675,18 +707,95 @@ export default function Opportunities() {
                       </React.Fragment>
                     );
                   })}
-                  {/* Infinite Scroll Sentinel */}
-                  <tr ref={observerTarget}>
-                    <td colSpan={10} className="p-4 text-center text-slate-400 text-xs">
-                      {visibleCount < processedConcursos.length ? 'Carregando mais...' : 'Fim da lista'}
-                    </td>
-                  </tr>
                 </>
               )}
             </tbody>
           </table>
         </div>
       </div>
+
+      <div ref={observerTarget} className="py-8 text-center text-slate-400 text-xs">
+        {visibleCount < processedConcursos.length ? 'Carregando mais...' : 'Fim da lista'}
+      </div>
+
+      {/* Mobile Filter Drawer */}
+      {isFilterDrawerOpen && (
+        <div className="fixed inset-0 z-[100] md:hidden">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsFilterDrawerOpen(false)} />
+          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl p-6 shadow-2xl animate-in slide-in-from-bottom duration-300">
+            <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-6" />
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold text-slate-900">Filtros</h3>
+              <button onClick={clearFilters} className="text-sm font-bold text-rose-600">Limpar</button>
+            </div>
+            
+            <div className="space-y-6 max-h-[60vh] overflow-y-auto pb-6">
+              <div>
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 block">Estado (UF)</label>
+                <select 
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 outline-none"
+                  value={ufFilter}
+                  onChange={e => setUfFilter(e.target.value)}
+                >
+                  <option value="">Todas as UFs</option>
+                  {ufs.map(uf => (
+                    <option key={uf} value={uf}>{uf}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 block">Esfera</label>
+                <select 
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 outline-none"
+                  value={esferaFilter}
+                  onChange={e => setEsferaFilter(e.target.value)}
+                >
+                  <option value="">Todas as Esferas</option>
+                  {esferas.map(esfera => (
+                    <option key={esfera} value={esfera}>{esfera}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 block">Modalidade</label>
+                <select 
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 outline-none"
+                  value={modalidadeFilter}
+                  onChange={e => setModalidadeFilter(e.target.value)}
+                >
+                  <option value="">Todas as Modalidades</option>
+                  {modalidades.map(modalidade => (
+                    <option key={modalidade} value={modalidade}>{modalidade}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 block">Status</label>
+                <select 
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 outline-none"
+                  value={statusFilter}
+                  onChange={e => setStatusFilter(e.target.value)}
+                >
+                  <option value="">Todos os Status</option>
+                  <option value="Aberto">Aberto</option>
+                  <option value="Autorizado">Autorizado</option>
+                  <option value="Comissão Formada">Comissão Formada</option>
+                  <option value="Previsto">Previsto</option>
+                  <option value="Solicitado">Solicitado</option>
+                  <option value="Encerrado">Encerrado</option>
+                </select>
+              </div>
+            </div>
+
+            <button
+              onClick={handleApplyFilters}
+              className="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-indigo-200 active:scale-[0.98] transition-all"
+            >
+              Aplicar Filtros
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -50,11 +50,22 @@ export interface User {
   displayName: string | null;
 }
 
+export interface NotificationSettings {
+  emailEnabled: boolean;
+  pushEnabled: boolean;
+  notifyInterested: boolean;
+  notifyNewExams: boolean;
+  notifyDeadlines: boolean;
+  deadlineThresholdDays: number;
+}
+
 interface ConcursoStore {
   user: User | null;
   concursos: Concurso[];
   scoringRules: ScoringRule[];
   userProfileScoring: UserProfileScoring;
+  notificationSettings: NotificationSettings;
+  lastSeenExamIds: string[];
   setUser: (user: User | null) => void;
   setConcursos: (concursos: Concurso[]) => void;
   updateConcurso: (id: string, updates: Partial<Concurso>) => void;
@@ -65,6 +76,8 @@ interface ConcursoStore {
   removeScoringRule: (id: string) => void;
   updateScoringRule: (id: string, rule: Partial<ScoringRule>) => void;
   updateUserProfileScoring: (updates: Partial<UserProfileScoring>) => void;
+  updateNotificationSettings: (updates: Partial<NotificationSettings>) => void;
+  setLastSeenExamIds: (ids: string[]) => void;
 }
 
 export const useConcursoStore = create<ConcursoStore>()(
@@ -79,6 +92,15 @@ export const useConcursoStore = create<ConcursoStore>()(
         modalidades_preferidas: {},
         escolaridades_preferidas: {},
       },
+      notificationSettings: {
+        emailEnabled: false,
+        pushEnabled: false,
+        notifyInterested: true,
+        notifyNewExams: true,
+        notifyDeadlines: true,
+        deadlineThresholdDays: 3,
+      },
+      lastSeenExamIds: [],
       setUser: (user) => set({ user }),
       setConcursos: (concursos) => set({ concursos }),
       updateConcurso: (id, updates) =>
@@ -108,6 +130,10 @@ export const useConcursoStore = create<ConcursoStore>()(
       updateUserProfileScoring: (updates) => set((state) => ({
         userProfileScoring: { ...state.userProfileScoring, ...updates }
       })),
+      updateNotificationSettings: (updates) => set((state) => ({
+        notificationSettings: { ...state.notificationSettings, ...updates }
+      })),
+      setLastSeenExamIds: (ids) => set({ lastSeenExamIds: ids }),
     }),
     {
       name: 'concursos-storage',

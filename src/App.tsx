@@ -50,7 +50,7 @@ function BottomNav() {
   const location = useLocation();
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex justify-around items-center pb-safe z-50">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-lg border-t border-slate-200 flex justify-around items-center pb-safe z-50 px-2 h-16">
       {links.map((link) => {
         const Icon = link.icon;
         const isActive = location.pathname === link.to;
@@ -59,12 +59,15 @@ function BottomNav() {
             key={link.to}
             to={link.to}
             className={clsx(
-              'flex flex-col items-center justify-center w-full py-3 space-y-1',
-              isActive ? 'text-indigo-600' : 'text-slate-500 hover:text-slate-900'
+              'flex flex-col items-center justify-center w-full h-full space-y-1 transition-all duration-200 relative',
+              isActive ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'
             )}
           >
-            <Icon size={20} />
-            <span className="text-[10px] font-medium">{link.label}</span>
+            {isActive && (
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-1 bg-indigo-600 rounded-b-full" />
+            )}
+            <Icon size={22} className={clsx(isActive && "scale-110")} />
+            <span className={clsx("text-[10px] font-bold tracking-tight uppercase", isActive ? "opacity-100" : "opacity-70")}>{link.label}</span>
           </Link>
         );
       })}
@@ -74,10 +77,14 @@ function BottomNav() {
 
 function MobileHeader() {
   return (
-    <div className="md:hidden flex items-center justify-between bg-slate-900 text-white p-4 sticky top-0 z-50">
-      <h1 className="text-lg font-bold tracking-tight">Concursos BR</h1>
+    <div className="md:hidden flex items-center justify-between bg-white/80 backdrop-blur-lg text-slate-900 px-4 py-3 sticky top-0 z-50 border-b border-slate-100">
+      <div className="flex items-center gap-2">
+        <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-200">
+          <Bookmark size={18} className="text-white" />
+        </div>
+        <h1 className="text-lg font-extrabold tracking-tight text-slate-900">Concursos BR</h1>
+      </div>
       <div className="flex items-center">
-        {/* We can render a simplified UserAuth here or just an icon */}
         <UserAuth compact />
       </div>
     </div>

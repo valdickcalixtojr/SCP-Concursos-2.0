@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, Save, AlertCircle, User, MapPin, Globe, GraduationCap, Layout } from 'lucide-react';
-import { useConcursoStore, ScoringRule } from '../store';
+import { Plus, Trash2, Save, AlertCircle, User, MapPin, Globe, GraduationCap, Layout, Bell, Mail, Smartphone } from 'lucide-react';
+import { useConcursoStore, ScoringRule, NotificationSettings } from '../store';
 import { ESFERA_PATTERNS, MODALIDADE_PATTERNS, BRAZILIAN_UFS, ESCOLARIDADE_OPTIONS } from '../constants';
 
 export default function Settings() {
   const { 
     scoringRules, addScoringRule, removeScoringRule, updateScoringRule,
-    userProfileScoring, updateUserProfileScoring 
+    userProfileScoring, updateUserProfileScoring,
+    notificationSettings, updateNotificationSettings
   } = useConcursoStore();
 
   const [newUf, setNewUf] = useState('');
@@ -380,6 +381,124 @@ export default function Settings() {
             <li>Use <strong>Contém</strong> para buscar palavras-chave em Cargos, Bancas ou Órgãos (ex: Cargo contém "TI" = 20 pts).</li>
             <li>A pontuação total de um concurso é a soma de todas as regras do perfil e regras dinâmicas atendidas.</li>
           </ul>
+        </div>
+      </div>
+
+      {/* Notificações Section */}
+      <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+        <div className="p-6 border-b border-slate-100 flex items-center space-x-2">
+          <Bell className="text-indigo-600" size={20} />
+          <h3 className="text-lg font-semibold text-slate-800">Preferências de Notificação</h3>
+        </div>
+        
+        <div className="p-6 space-y-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Canais de Notificação */}
+            <div className="space-y-4">
+              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Canais de Envio</h4>
+              <div className="space-y-3">
+                <label className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer hover:border-indigo-300 transition-all group">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 bg-white rounded-lg shadow-sm group-hover:text-indigo-600 transition-colors">
+                      <Mail size={18} />
+                    </div>
+                    <div>
+                      <span className="text-sm font-semibold text-slate-700 block">E-mail</span>
+                      <span className="text-[10px] text-slate-500">Receba resumos e alertas na sua caixa de entrada</span>
+                    </div>
+                  </div>
+                  <div className="relative inline-flex items-center cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      className="sr-only peer"
+                      checked={notificationSettings.emailEnabled}
+                      onChange={e => updateNotificationSettings({ emailEnabled: e.target.checked })}
+                    />
+                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                  </div>
+                </label>
+
+                <label className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer hover:border-indigo-300 transition-all group">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 bg-white rounded-lg shadow-sm group-hover:text-indigo-600 transition-colors">
+                      <Smartphone size={18} />
+                    </div>
+                    <div>
+                      <span className="text-sm font-semibold text-slate-700 block">Push (Navegador)</span>
+                      <span className="text-[10px] text-slate-500">Alertas em tempo real no seu dispositivo</span>
+                    </div>
+                  </div>
+                  <div className="relative inline-flex items-center cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      className="sr-only peer"
+                      checked={notificationSettings.pushEnabled}
+                      onChange={e => updateNotificationSettings({ pushEnabled: e.target.checked })}
+                    />
+                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            {/* Gatilhos de Notificação */}
+            <div className="space-y-4">
+              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest">O que notificar</h4>
+              <div className="space-y-3">
+                {[
+                  { id: 'notifyNewExams', label: 'Novos Concursos', desc: 'Sempre que um novo edital for importado' },
+                  { id: 'notifyInterested', label: 'Concursos Interessados', desc: 'Atualizações em concursos marcados como "Tenho Interesse"' },
+                  { id: 'notifyDeadlines', label: 'Prazos se Aproximando', desc: 'Alertas de fim de inscrição e data de prova' }
+                ].map((trigger) => (
+                  <label key={trigger.id} className="flex items-center justify-between p-3 bg-white rounded-lg border border-slate-100 cursor-pointer hover:bg-slate-50 transition-colors">
+                    <div>
+                      <span className="text-sm font-medium text-slate-700 block">{trigger.label}</span>
+                      <span className="text-[10px] text-slate-500">{trigger.desc}</span>
+                    </div>
+                    <input 
+                      type="checkbox" 
+                      checked={notificationSettings[trigger.id as keyof NotificationSettings] as boolean}
+                      onChange={e => updateNotificationSettings({ [trigger.id]: e.target.checked })}
+                      className="w-5 h-5 text-indigo-600 focus:ring-indigo-500 border-slate-300 rounded-md transition-all"
+                    />
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Configurações de Prazo (Slider) */}
+          <div className="pt-6 border-t border-slate-100">
+            <div className="max-w-xl">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h4 className="text-sm font-bold text-slate-800">Antecedência de Aviso de Prazos</h4>
+                  <p className="text-xs text-slate-500">Defina com quantos dias de antecedência você quer ser alertado sobre encerramentos.</p>
+                </div>
+                <div className="bg-indigo-50 px-4 py-2 rounded-xl border border-indigo-100">
+                  <span className="text-xl font-black text-indigo-600">{notificationSettings.deadlineThresholdDays}</span>
+                  <span className="text-xs font-bold text-indigo-400 ml-1 uppercase">dias</span>
+                </div>
+              </div>
+              
+              <div className="px-2">
+                <input 
+                  type="range" 
+                  min="1"
+                  max="30"
+                  step="1"
+                  value={notificationSettings.deadlineThresholdDays}
+                  onChange={e => updateNotificationSettings({ deadlineThresholdDays: Number(e.target.value) })}
+                  className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                />
+                <div className="flex justify-between mt-2 text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
+                  <span>1 dia</span>
+                  <span>15 dias</span>
+                  <span>30 dias</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
