@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
 import { signInWithPopup, signOut } from 'firebase/auth';
 import { auth, googleProvider, isFirebaseConfigured } from '../lib/firebase';
 import { useConcursoStore } from '../store';
-import { LogIn, LogOut, User as UserIcon, RefreshCw, AlertTriangle } from 'lucide-react';
-import { fetchGlobalConcursos } from '../services/firebaseSync';
+import { LogIn, LogOut, User as UserIcon, AlertTriangle } from 'lucide-react';
 
-export const UserAuth: React.FC<{ compact?: boolean }> = ({ compact }) => {
+interface UserAuthProps {
+  compact?: boolean;
+}
+
+export function UserAuth({ compact }: UserAuthProps) {
   const user = useConcursoStore((state) => state.user);
 
   const handleLogin = async () => {

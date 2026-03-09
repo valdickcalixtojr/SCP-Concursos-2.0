@@ -1,13 +1,13 @@
-import React, { useRef } from 'react';
+import { useRef, ChangeEvent } from 'react';
 import Papa from 'papaparse';
 import { Upload } from 'lucide-react';
 import { useConcursoStore, Concurso } from '../store';
 
-export const CSVUpload: React.FC = () => {
+export function CSVUpload() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { setConcursos, concursos: existingConcursos } = useConcursoStore();
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -36,24 +36,50 @@ export const CSVUpload: React.FC = () => {
 
           newConcursos.push({
             id,
-            source: row.Fonte || 'N/A',
-            institution: row.Orgao || 'N/A',
-            location: row.UF || 'N/A',
-            board: row.Banca || 'A Definir',
-            vacancies: row.Vagas || 'N/A',
-            salary: row.Salario || 'N/A',
-            registration_end: row.Fim_Inscricoes || 'N/A',
-            exemption_period: row.Periodo_Isencao || 'N/A',
-            exam_date: row.Data_Prova || 'A Definir',
-            link: row.Link || '',
-            positions: row.Cargos || 'N/A',
-            subjects: row.Disciplinas || 'N/A',
-            esfera: row.Esfera || 'N/A',
-            modalidade: row.Modalidade || 'N/A',
-            status: row.Status || 'N/A',
-            etapas: row.Etapas || 'N/A',
-            duplicadas: row.Duplicadas || 'N/A',
+            // Source fields (both for compatibility)
+            source: row.Fonte || row.fonte || 'N/A',
+            fonte: row.Fonte || row.fonte || 'N/A',
+            // Institution fields
+            institution: row.Orgao || row.orgao || 'N/A',
+            orgao: row.Orgao || row.orgao || 'N/A',
+            // Location fields
+            location: row.UF || row.uf || 'N/A',
+            uf: row.UF || row.uf || 'N/A',
+            // Board fields
+            board: row.Banca || row.banca || 'A Definir',
+            banca: row.Banca || row.banca || 'A Definir',
+            // Vacancies fields
+            vacancies: row.Vagas || row.vagas || 'N/A',
+            vagas: row.Vagas || row.vagas || 'N/A',
+            // Salary fields
+            salary: row.Salario || row.salario || 'N/A',
+            salario: row.Salario || row.salario || 'N/A',
+            // Registration end fields
+            registration_end: row.Fim_Inscricoes || row.fim_inscricoes || 'N/A',
+            fim_inscricoes: row.Fim_Inscricoes || row.fim_inscricoes || 'N/A',
+            // Exemption period fields
+            exemption_period: row.Periodo_Isencao || row.periodo_isencao || 'N/A',
+            periodo_isencao: row.Periodo_Isencao || row.periodo_isencao || 'N/A',
+            // Exam date fields
+            exam_date: row.Data_Prova || row.data_prova || 'A Definir',
+            data_prova: row.Data_Prova || row.data_prova || 'A Definir',
+            link: row.Link || row.link || '',
+            // Positions fields
+            positions: row.Cargos || row.cargos || 'N/A',
+            cargos: row.Cargos || row.cargos || 'N/A',
+            // Subjects fields
+            subjects: row.Disciplinas || row.disciplinas || 'N/A',
+            disciplinas: row.Disciplinas || row.disciplinas || 'N/A',
+            // Other fields
+            esfera: row.Esfera || row.esfera || 'N/A',
+            modalidade: row.Modalidade || row.modalidade || 'N/A',
+            status: row.Status || row.status || 'N/A',
+            escolaridade: row.Escolaridade || row.escolaridade || 'N/A',
+            etapas: row.Etapas || row.etapas || 'N/A',
+            duplicadas: row.Duplicadas || row.duplicadas || 'N/A',
+            // User state
             interest_status: existing?.interest_status || 'none',
+            is_favorite: existing?.is_favorite || false,
             is_enrolled: existing?.is_enrolled || false,
             exam_location: existing?.exam_location,
             notes: existing?.notes,
@@ -73,7 +99,7 @@ export const CSVUpload: React.FC = () => {
   };
 
   return (
-    <div className="flex items-center w-full">
+    <div className="flex items-center">
       <input
         type="file"
         accept=".csv"
@@ -83,10 +109,10 @@ export const CSVUpload: React.FC = () => {
       />
       <button
         onClick={() => fileInputRef.current?.click()}
-        className="w-full flex items-center justify-center space-x-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm text-sm md:text-base"
+        className="flex items-center justify-center gap-2 bg-slate-800 text-white px-4 py-2 rounded-xl hover:bg-slate-700 transition-colors shadow-sm text-sm font-medium"
       >
         <Upload size={18} />
-        <span>Upload de CSV</span>
+        <span>Upload CSV</span>
       </button>
     </div>
   );

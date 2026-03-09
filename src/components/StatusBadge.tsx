@@ -1,4 +1,3 @@
-import React from 'react';
 import { EditalStatus, getStatusConfig } from '../utils/concursoUtils';
 import clsx from 'clsx';
 
@@ -7,7 +6,7 @@ interface StatusBadgeProps {
   className?: string;
 }
 
-export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className }) => {
+export function StatusBadge({ status, className }: StatusBadgeProps) {
   const config = getStatusConfig(status);
 
   return (

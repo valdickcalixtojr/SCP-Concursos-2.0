@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Plus, Trash2, AlertCircle, User, MapPin, Globe, GraduationCap, Layout, Bell, Mail, Smartphone } from 'lucide-react';
 import { useConcursoStore, ScoringRule, NotificationSettings } from '../store';
 import { ESFERA_PATTERNS, MODALIDADE_PATTERNS, BRAZILIAN_UFS, ESCOLARIDADE_OPTIONS } from '../constants';
