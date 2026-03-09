@@ -32,9 +32,8 @@ export default function Opportunities() {
   // Sorting state
   const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: 'asc' | 'desc' } | null>(null);
   
-  // Infinite scroll state
+  // Pagination state
   const [visibleCount, setVisibleCount] = useState(50);
-  const observerTarget = useRef(null);
 
   const handleDownload = () => {
     const dataToExport = processedConcursos.map(c => ({
@@ -191,24 +190,6 @@ export default function Opportunities() {
   const visibleConcursos = useMemo(() => {
     return processedConcursos.slice(0, visibleCount);
   }, [processedConcursos, visibleCount]);
-
-  // Infinite scroll observer
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && visibleCount < processedConcursos.length) {
-          setVisibleCount(prev => prev + 50);
-        }
-      },
-      { threshold: 1.0 }
-    );
-
-    if (observerTarget.current) {
-      observer.observe(observerTarget.current);
-    }
-
-    return () => observer.disconnect();
-  }, [processedConcursos.length, visibleCount]);
 
   const handleMarkInterest = (id: string, status: 'interested' | 'ignored' | 'none') => {
     setAnimatingRowId(id);
@@ -454,12 +435,12 @@ export default function Opportunities() {
 
                     <div className="grid grid-cols-2 gap-3 py-3 border-y border-slate-50 mb-4">
                       <div>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Salário</p>
-                        <p className="text-sm font-bold text-indigo-600 truncate">{c.salary}</p>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Banca</p>
+                        <p className="text-sm font-bold text-slate-700 truncate">{c.board}</p>
                       </div>
                       <div>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Vagas</p>
-                        <p className="text-sm font-bold text-slate-700 truncate">{c.vacancies}</p>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Salário</p>
+                        <p className="text-sm font-bold text-indigo-600 truncate">{c.salary}</p>
                       </div>
                     </div>
 
@@ -511,8 +492,8 @@ export default function Opportunities() {
                     <div className="p-4 bg-slate-50 border-t border-slate-100 space-y-4">
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Banca</p>
-                          <p className="text-xs text-slate-700 font-medium">{c.board}</p>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Vagas</p>
+                          <p className="text-xs text-slate-700 font-medium">{c.vacancies}</p>
                         </div>
                         <div>
                           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Prova</p>
@@ -525,6 +506,20 @@ export default function Opportunities() {
                         <div>
                           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Esfera</p>
                           <p className="text-xs text-slate-700 font-medium">{c.esfera}</p>
+                        </div>
+                        {c.etapas && (
+                          <div className="col-span-2">
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Etapas</p>
+                            <p className="text-xs text-slate-700 font-medium">{c.etapas}</p>
+                          </div>
+                        )}
+                        <div className="col-span-2">
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Cargos</p>
+                          <p className="text-xs text-slate-700 font-medium line-clamp-3">{c.positions}</p>
+                        </div>
+                        <div className="col-span-2">
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Disciplinas</p>
+                          <p className="text-xs text-slate-700 font-medium line-clamp-3">{c.subjects}</p>
                         </div>
                       </div>
                       {c.link && c.link !== 'N/A' && (
@@ -555,13 +550,7 @@ export default function Opportunities() {
               <tr>
                 <th className="px-6 py-4 w-10"></th>
                 <th className="px-6 py-4 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleSort('institution')}>
-                  <div className="flex items-center">Órgão / Fonte <SortIcon column="institution" /></div>
-                </th>
-                <th className="px-6 py-4 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleSort('location')}>
-                  <div className="flex items-center">UF <SortIcon column="location" /></div>
-                </th>
-                <th className="px-6 py-4 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleSort('board')}>
-                  <div className="flex items-center">Banca <SortIcon column="board" /></div>
+                  <div className="flex items-center">Órgão / Instituição <SortIcon column="institution" /></div>
                 </th>
                 <th className="px-6 py-4 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleSort('score')}>
                   <div className="flex items-center">Pontuação <SortIcon column="score" /></div>
@@ -569,8 +558,11 @@ export default function Opportunities() {
                 <th className="px-6 py-4 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleSort('status')}>
                   <div className="flex items-center">Status <SortIcon column="status" /></div>
                 </th>
-                <th className="px-6 py-4 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleSort('salary')}>
-                  <div className="flex items-center">Salário <SortIcon column="salary" /></div>
+                <th className="px-6 py-4 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleSort('board')}>
+                  <div className="flex items-center">Banca <SortIcon column="board" /></div>
+                </th>
+                <th className="px-6 py-4 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleSort('exam_date')}>
+                  <div className="flex items-center">Data Prova <SortIcon column="exam_date" /></div>
                 </th>
                 <th className="px-6 py-4 text-right">Ações</th>
               </tr>
@@ -608,22 +600,23 @@ export default function Opportunities() {
                                   toggleFavorite(c.id);
                                 }}
                                 className={clsx(
-                                  "transition-colors",
+                                  "transition-colors flex-shrink-0",
                                   c.is_favorite ? "text-amber-400" : "text-slate-300 hover:text-amber-400"
                                 )}
                               >
                                 <Star size={18} fill={c.is_favorite ? "currentColor" : "none"} />
                               </button>
-                              <div>
-                                <div className="font-medium text-slate-900">{c.institution}</div>
-                                <div className="text-slate-500 text-xs">{c.source}</div>
+                              <div className="min-w-0">
+                                <div className="flex items-center gap-2 mb-0.5">
+                                  <span className="font-mono text-[10px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-600 font-bold flex-shrink-0">{c.location}</span>
+                                  <div className="font-medium text-slate-900 truncate">{c.institution}</div>
+                                </div>
+                                <div className="text-slate-500 text-xs truncate">
+                                  {c.source}
+                                </div>
                               </div>
                             </div>
                           </td>
-                          <td className="px-6 py-4">
-                            <span className="font-mono text-xs bg-slate-100 px-1.5 py-0.5 rounded text-slate-600">{c.location}</span>
-                          </td>
-                          <td className="px-6 py-4 text-slate-600">{c.board}</td>
                           <td className="px-6 py-4">
                             <div className="flex items-center space-x-1">
                               <Trophy size={14} className={clsx(c.calculatedScore > 70 ? "text-emerald-500" : "text-amber-500")} />
@@ -633,70 +626,116 @@ export default function Opportunities() {
                           <td className="px-6 py-4">
                             <StatusBadge status={status as any} />
                           </td>
-                          <td className="px-6 py-4 text-indigo-600 font-medium">{c.salary}</td>
+                          <td className="px-6 py-4 text-slate-600 font-medium">{c.board}</td>
+                          <td className="px-6 py-4 text-slate-600">{c.exam_date}</td>
                           <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
-                            <div className="flex items-center justify-end space-x-2">
+                            <div className="flex items-center justify-end space-x-1.5">
                               {c.link && c.link !== 'N/A' && (
-                                <a href={c.link} target="_blank" rel="noopener noreferrer" className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
-                                  <ExternalLink size={18} />
+                                <a href={c.link} target="_blank" rel="noopener noreferrer" className="p-1 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Acessar Edital">
+                                  <ExternalLink size={16} />
                                 </a>
                               )}
-                              <button 
-                                onClick={() => handleMarkInterest(c.id, c.interest_status === 'interested' ? 'none' : 'interested')}
-                                className={clsx(
-                                  "p-1.5 rounded-lg transition-colors",
-                                  c.interest_status === 'interested' ? "bg-indigo-600 text-white" : "text-emerald-600 hover:bg-emerald-50"
-                                )}
-                              >
-                                <Check size={18} />
-                              </button>
-                              <button 
-                                onClick={() => handleMarkInterest(c.id, c.interest_status === 'ignored' ? 'none' : 'ignored')}
-                                className={clsx(
-                                  "p-1.5 rounded-lg transition-colors",
-                                  c.interest_status === 'ignored' ? "bg-slate-600 text-white" : "text-rose-600 hover:bg-rose-50"
-                                )}
-                              >
-                                <X size={18} />
-                              </button>
+                              
+                              {c.interest_status === 'interested' ? (
+                                <button 
+                                  onClick={() => handleMarkInterest(c.id, 'none')}
+                                  className="flex items-center gap-1 bg-indigo-600 text-white px-2 py-1 rounded-md text-[10px] font-bold shadow-sm hover:bg-indigo-700 transition-colors"
+                                >
+                                  <Check size={12} />
+                                  <span>Interessado</span>
+                                </button>
+                              ) : c.interest_status === 'ignored' ? (
+                                <button 
+                                  onClick={() => handleMarkInterest(c.id, 'none')}
+                                  className="flex items-center gap-1 bg-slate-200 text-slate-600 px-2 py-1 rounded-md text-[10px] font-bold hover:bg-slate-300 transition-colors"
+                                >
+                                  <RefreshCw size={12} />
+                                  <span>Restaurar</span>
+                                </button>
+                              ) : (
+                                <>
+                                  <button 
+                                    onClick={() => handleMarkInterest(c.id, 'interested')}
+                                    className="flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-100 px-2 py-1 rounded-md text-[10px] font-bold hover:bg-emerald-100 transition-colors"
+                                  >
+                                    <Check size={12} />
+                                    <span>Interesse</span>
+                                  </button>
+                                  <button 
+                                    onClick={() => handleMarkInterest(c.id, 'ignored')}
+                                    className="flex items-center gap-1 bg-rose-50 text-rose-700 border border-rose-100 px-2 py-1 rounded-md text-[10px] font-bold hover:bg-rose-100 transition-colors"
+                                  >
+                                    <X size={12} />
+                                    <span>Ignorar</span>
+                                  </button>
+                                </>
+                              )}
                             </div>
                           </td>
                         </tr>
                         {isExpanded && (
                           <tr className="bg-slate-50/50">
-                            <td colSpan={8} className="p-6">
-                              <div className="grid grid-cols-2 gap-8">
-                                <div className="space-y-4">
-                                  <h4 className="font-bold text-slate-800 border-b pb-2">Informações Gerais</h4>
-                                  <div className="grid grid-cols-2 gap-4 text-sm">
-                                    <div>
-                                      <p className="text-slate-400 font-bold text-[10px] uppercase">Esfera</p>
-                                      <p className="font-medium">{c.esfera}</p>
+                            <td colSpan={6} className="p-6">
+                              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                                {/* Informações Gerais - Bento Style */}
+                                <div className="lg:col-span-1 space-y-4">
+                                  <h4 className="font-bold text-slate-800 border-b pb-2 flex items-center gap-2">
+                                    <Layout size={16} className="text-indigo-600" />
+                                    Informações Gerais
+                                  </h4>
+                                  <div className="grid grid-cols-2 gap-3">
+                                    <div className="bg-indigo-50/50 p-3 rounded-xl border border-indigo-100 shadow-sm col-span-2">
+                                      <p className="text-indigo-400 font-bold text-[9px] uppercase tracking-wider mb-1">Órgão / UF / Banca</p>
+                                      <p className="font-bold text-slate-900 text-sm">
+                                        {c.institution} <span className="text-indigo-300 mx-1">|</span> {c.location} <span className="text-indigo-300 mx-1">|</span> {c.board}
+                                      </p>
                                     </div>
-                                    <div>
-                                      <p className="text-slate-400 font-bold text-[10px] uppercase">Modalidade</p>
-                                      <p className="font-medium">{c.modalidade}</p>
+                                    <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                                      <p className="text-slate-400 font-bold text-[9px] uppercase tracking-wider mb-1">Esfera</p>
+                                      <p className="font-semibold text-slate-700 text-xs">{c.esfera}</p>
                                     </div>
-                                    <div>
-                                      <p className="text-slate-400 font-bold text-[10px] uppercase">Vagas</p>
-                                      <p className="font-medium">{c.vacancies}</p>
+                                    <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                                      <p className="text-slate-400 font-bold text-[9px] uppercase tracking-wider mb-1">Modalidade</p>
+                                      <p className="font-semibold text-slate-700 text-xs">{c.modalidade}</p>
                                     </div>
-                                    <div>
-                                      <p className="text-slate-400 font-bold text-[10px] uppercase">Inscrições até</p>
-                                      <p className="font-medium">{c.registration_end}</p>
+                                    <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                                      <p className="text-slate-400 font-bold text-[9px] uppercase tracking-wider mb-1">Vagas</p>
+                                      <p className="font-semibold text-slate-700 text-xs">{c.vacancies}</p>
+                                    </div>
+                                    <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                                      <p className="text-slate-400 font-bold text-[9px] uppercase tracking-wider mb-1">Inscrições até</p>
+                                      <p className="font-semibold text-slate-700 text-xs">{c.registration_end}</p>
+                                    </div>
+                                    <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                                      <p className="text-slate-400 font-bold text-[9px] uppercase tracking-wider mb-1">Data da Prova</p>
+                                      <p className="font-semibold text-slate-700 text-xs">{c.exam_date}</p>
+                                    </div>
+                                    <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                                      <p className="text-slate-400 font-bold text-[9px] uppercase tracking-wider mb-1">Fonte</p>
+                                      <p className="font-semibold text-slate-500 text-xs">{c.source}</p>
                                     </div>
                                   </div>
                                 </div>
-                                <div className="space-y-4">
-                                  <h4 className="font-bold text-slate-800 border-b pb-2">Cargos e Disciplinas</h4>
-                                  <div className="space-y-3 text-sm">
-                                    <div>
-                                      <p className="text-slate-400 font-bold text-[10px] uppercase">Cargos</p>
-                                      <p className="font-medium">{c.positions}</p>
+
+                                {/* Cargos e Disciplinas */}
+                                <div className="lg:col-span-2 space-y-6">
+                                  <div className="space-y-4">
+                                    <h4 className="font-bold text-slate-800 border-b pb-2 flex items-center gap-2">
+                                      <Briefcase size={16} className="text-indigo-600" />
+                                      Cargos e Oportunidades
+                                    </h4>
+                                    <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+                                      <p className="text-slate-700 text-sm leading-relaxed">{c.positions}</p>
                                     </div>
-                                    <div>
-                                      <p className="text-slate-400 font-bold text-[10px] uppercase">Disciplinas</p>
-                                      <p className="font-medium whitespace-pre-wrap">{c.subjects}</p>
+                                  </div>
+
+                                  <div className="space-y-4">
+                                    <h4 className="font-bold text-slate-800 border-b pb-2 flex items-center gap-2">
+                                      <BookOpen size={16} className="text-indigo-600" />
+                                      Conteúdo Programático / Disciplinas
+                                    </h4>
+                                    <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+                                      <p className="text-slate-600 text-sm whitespace-pre-wrap leading-relaxed">{c.subjects}</p>
                                     </div>
                                   </div>
                                 </div>
@@ -714,8 +753,29 @@ export default function Opportunities() {
         </div>
       </div>
 
-      <div ref={observerTarget} className="py-8 text-center text-slate-400 text-xs">
-        {visibleCount < processedConcursos.length ? 'Carregando mais...' : 'Fim da lista'}
+      {/* Pagination / Load More */}
+      <div className="py-12">
+        {visibleCount < processedConcursos.length ? (
+          <div className="flex flex-col items-center gap-4">
+            <button
+              onClick={() => setVisibleCount(prev => prev + 50)}
+              className="w-full md:w-auto bg-white text-indigo-600 border border-indigo-200 px-8 py-4 md:py-3 rounded-2xl md:rounded-xl font-bold shadow-sm hover:bg-indigo-50 transition-all active:scale-95 flex items-center justify-center gap-2"
+            >
+              <RefreshCw size={18} />
+              Carregar Mais Oportunidades
+            </button>
+            <p className="text-slate-400 text-[10px] md:text-xs font-bold uppercase tracking-widest">
+              Exibindo {visibleCount} de {processedConcursos.length} concursos
+            </p>
+          </div>
+        ) : processedConcursos.length > 0 && (
+          <div className="text-center">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 rounded-full text-slate-500 text-[10px] font-bold uppercase tracking-wider">
+              <Check size={14} />
+              Fim da lista
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Mobile Filter Drawer */}

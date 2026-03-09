@@ -117,6 +117,7 @@ export const initFirebaseSync = () => {
         uid: firebaseUser.uid,
         email: firebaseUser.email,
         displayName: firebaseUser.displayName,
+        photoURL: firebaseUser.photoURL,
       };
       store.setUser(user);
 

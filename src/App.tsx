@@ -1,17 +1,20 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Map as MapIcon, Settings as SettingsIcon, Bookmark } from 'lucide-react';
+import { LayoutDashboard, Map as MapIcon, Settings as SettingsIcon, Bookmark, User as UserIcon } from 'lucide-react';
 import clsx from 'clsx';
 import Opportunities from './pages/Opportunities';
 import MyExams from './pages/MyExams';
 import MapView from './pages/Map';
 import Settings from './pages/Settings';
+import Auth from './pages/Auth';
 import { UserAuth } from './components/UserAuth';
+import { Logo } from './components/Logo';
 
 const links = [
   { to: '/', icon: LayoutDashboard, label: 'Oportunidades' },
   { to: '/my-exams', icon: Bookmark, label: 'Meus Concursos' },
   { to: '/map', icon: MapIcon, label: 'Mapa' },
   { to: '/settings', icon: SettingsIcon, label: 'Configurações' },
+  { to: '/auth', icon: UserIcon, label: 'Perfil' },
 ];
 
 function Sidebar() {
@@ -19,7 +22,8 @@ function Sidebar() {
   
   return (
     <div className="hidden md:flex w-64 bg-slate-900 text-white h-full flex-col">
-      <div className="p-6">
+      <div className="p-6 flex items-center gap-3">
+        <Logo className="w-10 h-10" />
         <h1 className="text-xl font-bold tracking-tight">Concursos BR</h1>
       </div>
       <nav className="flex-1 px-4 space-y-2">
@@ -79,9 +83,7 @@ function MobileHeader() {
   return (
     <div className="md:hidden flex items-center justify-between bg-white/80 backdrop-blur-lg text-slate-900 px-4 py-3 sticky top-0 z-50 border-b border-slate-100">
       <div className="flex items-center gap-2">
-        <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-200">
-          <Bookmark size={18} className="text-white" />
-        </div>
+        <Logo />
         <h1 className="text-lg font-extrabold tracking-tight text-slate-900">Concursos BR</h1>
       </div>
       <div className="flex items-center">
@@ -104,6 +106,7 @@ export default function App() {
               <Route path="/my-exams" element={<MyExams />} />
               <Route path="/map" element={<MapView />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/auth" element={<Auth />} />
             </Routes>
           </main>
         </div>
